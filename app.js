@@ -1,289 +1,245 @@
 // ⚙️ ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ ИЗ SUPABASE
 const SUPABASE_URL = 'https://zojrzpogkimwvfcuttts.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_InXDqXqXDAK3BL0ez1wZvg_zqW22h1v';
+console.log('✅ App.js загружен');
+console.log('Supabase URL:', SUPABASE_URL);
+
+// Инициализация Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function checkUserAndRedirect() {
+// Функция проверки сессии
+async function checkSession() {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        window.location.href = 'index.html';
-        return null;
-    }
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-    
-    const currentPage = window.location.pathname;
-    if (profile?.role === 'student' && !currentPage.includes('student.html')) {
-        window.location.href = 'student.html';
-    } else if (profile?.role === 'teacher' && !currentPage.includes('teacher.html')) {
-        window.location.href = 'teacher.html';
-    }
-    return { user, profile };
-}
-
-// ------------------ СТРАНИЦА ВХОДА ------------------
-if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/')) {
-    const loginTab = document.getElementById('loginTab');
-    const registerTab = document.getElementById('registerTab');
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const messageDiv = document.getElementById('message');
-
-    loginTab.onclick = () => {
-        loginTab.classList.add('active');
-        registerTab.classList.remove('active');
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
-    };
-    registerTab.onclick = () => {
-        registerTab.classList.add('active');
-        loginTab.classList.remove('active');
-        registerForm.classList.remove('hidden');
-        loginForm.classList.add('hidden');
-    };
-
-    document.getElementById('doLogin').onclick = async () => {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) messageDiv.innerText = error.message;
-        else window.location.href = 'student.html';
-    };
-
-    document.getElementById('doRegister').onclick = async () => {
-        const email = document.getElementById('regEmail').value;
-        const password = document.getElementById('regPassword').value;
-        const fullName = document.getElementById('regName').value;
-        const role = document.getElementById('regRole').value;
-        const { error } = await supabase.auth.signUp({
-            email, password,
-            options: { data: { full_name: fullName, role } }
-        });
-        if (error) messageDiv.innerText = error.message;
-        else messageDiv.innerHTML = '<span class="text-green-400">✅ Регистрация успешна! Теперь войдите.</span>';
-    };
-}
-
-// ------------------ СТУДЕНТ ------------------
-if (window.location.pathname.includes('student.html')) {
-    let currentUser = null;
-    (async () => {
-        const res = await checkUserAndRedirect();
-        if (!res) return;
-        currentUser = res.user;
-        await loadAssignmentsTable();
-        await loadResultsTable();
-        await updateStats();
-    })();
-
-    document.getElementById('logoutBtn').onclick = async () => {
-        await supabase.auth.signOut();
-        window.location.href = 'index.html';
-    };
-
-    async function updateStats() {
-        const { data: assignments } = await supabase.from('assignments').select('*');
-        const { data: submissions } = await supabase.from('submissions').select('grade, status').eq('student_id', currentUser.id);
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
         
-        document.getElementById('totalAssignments').innerText = assignments?.length || 0;
-        const completed = submissions?.filter(s => s.status === 'graded').length || 0;
-        document.getElementById('completedCount').innerText = completed;
-        const avg = submissions?.filter(s => s.grade).reduce((a,b) => a + b.grade, 0) / (submissions?.filter(s => s.grade).length || 1);
-        document.getElementById('avgGrade').innerText = avg ? avg.toFixed(1) : '0';
-        document.getElementById('pendingCount').innerText = `${completed}/${assignments?.length || 0}`;
+        if (profile?.role === 'student' && window.location.pathname.includes('index.html')) {
+            window.location.href = 'student.html';
+        } else if (profile?.role === 'teacher' && window.location.pathname.includes('index.html')) {
+            window.location.href = 'teacher.html';
+        }
     }
+}
 
-    async function loadAssignmentsTable() {
+// ========== СТРАНИЦА ВХОДА ==========
+if (window.location.pathname.includes('index.html') || 
+    window.location.pathname === '/' || 
+    window.location.pathname.endsWith('/')) {
+    
+    console.log('📍 На странице входа');
+    
+    // Ждём загрузки DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('✅ DOM загружен');
+        
+        const loginTab = document.getElementById('loginTab');
+        const registerTab = document.getElementById('registerTab');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const messageDiv = document.getElementById('message');
+        
+        // Проверяем, что элементы найдены
+        if (!loginTab) console.error('❌ Элемент loginTab не найден');
+        if (!registerTab) console.error('❌ Элемент registerTab не найден');
+        
+        // Переключение вкладок
+        if (loginTab && registerTab) {
+            loginTab.onclick = () => {
+                console.log('Вкладка Вход нажата');
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            };
+            
+            registerTab.onclick = () => {
+                console.log('Вкладка Регистрация нажата');
+                registerTab.classList.add('active');
+                loginTab.classList.remove('active');
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            };
+        }
+        
+        // РЕГИСТРАЦИЯ
+        const regBtn = document.getElementById('doRegister');
+        if (regBtn) {
+            regBtn.onclick = async () => {
+                console.log('🔘 Кнопка регистрации нажата');
+                
+                const email = document.getElementById('regEmail').value;
+                const password = document.getElementById('regPassword').value;
+                const fullName = document.getElementById('regName').value;
+                const role = document.getElementById('regRole').value;
+                
+                console.log('Email:', email, 'Роль:', role);
+                
+                if (!email || !password || !fullName) {
+                    messageDiv.innerHTML = '<span class="text-red-400">❌ Заполните все поля</span>';
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    messageDiv.innerHTML = '<span class="text-red-400">❌ Пароль должен быть минимум 6 символов</span>';
+                    return;
+                }
+                
+                try {
+                    const { data, error } = await supabase.auth.signUp({
+                        email: email,
+                        password: password,
+                        options: {
+                            data: {
+                                full_name: fullName,
+                                role: role
+                            }
+                        }
+                    });
+                    
+                    if (error) {
+                        console.error('Ошибка регистрации:', error);
+                        messageDiv.innerHTML = `<span class="text-red-400">❌ ${error.message}</span>`;
+                    } else {
+                        console.log('Регистрация успешна:', data);
+                        messageDiv.innerHTML = '<span class="text-green-400">✅ Регистрация успешна! Теперь войдите.</span>';
+                        // Очищаем форму
+                        document.getElementById('regEmail').value = '';
+                        document.getElementById('regPassword').value = '';
+                        document.getElementById('regName').value = '';
+                        // Переключаем на форму входа
+                        loginTab.click();
+                    }
+                } catch (err) {
+                    console.error('Исключение:', err);
+                    messageDiv.innerHTML = '<span class="text-red-400">❌ Ошибка соединения</span>';
+                }
+            };
+        } else {
+            console.error('❌ Кнопка doRegister не найдена');
+        }
+        
+        // ВХОД
+        const loginBtn = document.getElementById('doLogin');
+        if (loginBtn) {
+            loginBtn.onclick = async () => {
+                console.log('🔘 Кнопка входа нажата');
+                
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                if (!email || !password) {
+                    messageDiv.innerHTML = '<span class="text-red-400">❌ Введите email и пароль</span>';
+                    return;
+                }
+                
+                try {
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+                    
+                    if (error) {
+                        console.error('Ошибка входа:', error);
+                        messageDiv.innerHTML = `<span class="text-red-400">❌ ${error.message}</span>`;
+                    } else {
+                        console.log('Вход успешен:', data);
+                        // Получаем роль пользователя
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('role')
+                            .eq('id', data.user.id)
+                            .single();
+                        
+                        if (profile?.role === 'teacher') {
+                            window.location.href = 'teacher.html';
+                        } else {
+                            window.location.href = 'student.html';
+                        }
+                    }
+                } catch (err) {
+                    console.error('Исключение:', err);
+                    messageDiv.innerHTML = '<span class="text-red-400">❌ Ошибка соединения</span>';
+                }
+            };
+        }
+    });
+}
+
+// ========== СТУДЕНТ ==========
+if (window.location.pathname.includes('student.html')) {
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log('📍 Страница студента');
+        
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            window.location.href = 'index.html';
+            return;
+        }
+        
+        document.getElementById('logoutBtn').onclick = async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+        };
+        
+        // Загрузка заданий
         const { data: assignments } = await supabase
             .from('assignments')
-            .select('*')
-            .order('created_at', { ascending: false });
+            .select('*');
         
         const tbody = document.getElementById('assignmentsTable');
-        if (!assignments?.length) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500">Нет доступных работ</td></tr>';
-            return;
+        if (tbody) {
+            if (!assignments?.length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8">Нет работ</td></tr>';
+            } else {
+                tbody.innerHTML = assignments.map(a => `
+                    <tr>
+                        <td class="px-6 py-4">${a.title}</td>
+                        <td class="px-6 py-4">${a.description || '-'}</td>
+                        <td class="px-6 py-4">${a.due_date || '-'}</td>
+                        <td class="px-6 py-4"><button onclick="alert("Сдача работ в разработке")" class="bg-rose-500 px-4 py-2 rounded">Сдать</button></td>
+                    </tr>
+                `).join('');
+            }
         }
-        tbody.innerHTML = assignments.map(a => `
-            <tr>
-                <td class="font-semibold">${a.title}</td>
-                <td class="text-gray-400">${a.description || '—'}</td>
-                <td class="text-gray-400">${a.due_date || 'Не указан'}</td>
-                <td><button onclick="openSubmitModal('${a.id}')" class="neo-btn text-sm py-2 px-4"><i class="fas fa-upload mr-1"></i>Сдать</button></td>
-            </tr>
-        `).join('');
-    }
-
-    window.openSubmitModal = (assignmentId) => {
-        document.getElementById('assignmentId').value = assignmentId;
-        document.getElementById('submitModal').classList.remove('hidden');
-    };
-
-    document.getElementById('closeModal').onclick = () => {
-        document.getElementById('submitModal').classList.add('hidden');
-        document.getElementById('workText').value = '';
-    };
-    document.getElementById('submitWorkBtn').onclick = async () => {
-        const assignmentId = document.getElementById('assignmentId').value;
-        const workText = document.getElementById('workText').value;
-        if (!workText) return alert('Введите текст работы');
-        
-        await supabase.from('submissions').insert({
-            assignment_id: assignmentId,
-            student_id: currentUser.id,
-            work_text: workText,
-            status: 'pending'
-        });
-        alert('✅ Работа отправлена!');
-        document.getElementById('submitModal').classList.add('hidden');
-        document.getElementById('workText').value = '';
-        await loadResultsTable();
-        await updateStats();
-    };
-
-    async function loadResultsTable() {
-        const { data: subs } = await supabase
-            .from('submissions')
-            .select(`*, assignments(title)`)
-            .eq('student_id', currentUser.id)
-            .order('submitted_at', { ascending: false });
-        
-        const tbody = document.getElementById('resultsTable');
-        if (!subs?.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">Вы ещё не сдавали работы</td></tr>';
-            return;
-        }
-        tbody.innerHTML = subs.map(s => {
-            let statusHtml = s.status === 'graded' 
-                ? '<span class="badge-premium badge-graded"><i class="fas fa-check-circle"></i> Проверено</span>'
-                : '<span class="badge-premium badge-pending"><i class="fas fa-clock"></i> Ожидает</span>';
-            
-            let gradeHtml = s.grade 
-                ? `<span class="text-2xl font-bold text-rose-400">${s.grade}</span>`
-                : '<span class="text-gray-500">—</span>';
-            
-            if (s.debt) gradeHtml = '<span class="badge-premium badge-debt"><i class="fas fa-exclamation-triangle"></i> Долг</span>';
-            
-            return `
-                <tr>
-                    <td class="font-semibold">${s.assignments?.title || 'Работа'}</td>
-                    <td class="text-gray-400 max-w-xs truncate">${s.work_text || '—'}</td>
-                    <td>${statusHtml}</td>
-                    <td class="text-center">${gradeHtml}</td>
-                    <td class="text-gray-400">${s.teacher_comment || '—'}</td>
-                </tr>
-            `;
-        }).join('');
-    }
+    });
 }
 
-// ------------------ ПРЕПОДАВАТЕЛЬ ------------------
+// ========== ПРЕПОДАВАТЕЛЬ ==========
 if (window.location.pathname.includes('teacher.html')) {
-    let teacherId = null;
-    (async () => {
-        const res = await checkUserAndRedirect();
-        if (!res) return;
-        teacherId = res.user.id;
-        await loadSubmissionsTable();
-    })();
-
-    document.getElementById('logoutBtn').onclick = async () => {
-        await supabase.auth.signOut();
-        window.location.href = 'index.html';
-    };
-
-    document.getElementById('createAssignment').onclick = async () => {
-        const title = document.getElementById('newTitle').value;
-        const desc = document.getElementById('newDesc').value;
-        const dueDate = document.getElementById('newDueDate').value;
-        if (!title) return alert('Введите название работы');
-        await supabase.from('assignments').insert({
-            title, description: desc, due_date: dueDate, created_by: teacherId
-        });
-        alert('✅ Работа создана!');
-        document.getElementById('newTitle').value = '';
-        document.getElementById('newDesc').value = '';
-        document.getElementById('newDueDate').value = '';
-        await loadSubmissionsTable();
-    };
-
-    async function loadSubmissionsTable() {
-        const { data: submissions } = await supabase
-            .from('submissions')
-            .select(`*, assignments(title), profiles(full_name, email)`)
-            .order('submitted_at', { ascending: false });
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log('📍 Страница преподавателя');
         
-        const tbody = document.getElementById('submissionsTable');
-        const pending = submissions?.filter(s => s.status !== 'graded').length || 0;
-        document.getElementById('pendingSubmissionsCount').innerText = pending;
-        
-        if (!submissions?.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">Нет сданных работ</td></tr>';
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            window.location.href = 'index.html';
             return;
         }
-        tbody.innerHTML = submissions.map(s => {
-            let statusHtml = s.status === 'graded' 
-                ? '<span class="status-badge status-graded"><i class="fas fa-check-circle"></i> Оценено</span>'
-                : '<span class="status-badge status-pending"><i class="fas fa-hourglass-half"></i> На проверке</span>';
-            
-            let gradeHtml = s.grade 
-                ? `<span class="text-xl font-bold ${s.debt ? 'text-rose-400' : 'text-green-400'}">${s.grade}</span>`
-                : '<span class="text-gray-500">—</span>';
-            
-            let actionHtml = s.status !== 'graded' 
-                ? `<button onclick="openGradeModal('${s.id}', '${(s.profiles?.full_name || s.profiles?.email).replace(/'/g, "\\'")}', '${(s.work_text || '').replace(/'/g, "\\'")}')" class="btn-grade"><i class="fas fa-star mr-1"></i>Оценить</button>`
-                : '<span class="text-green-500 text-sm"><i class="fas fa-check"></i> Готово</span>';
-            
-            return `
-                <tr>
-                    <td class="font-semibold">${s.assignments?.title || '—'}</td>
-                    <td><i class="fas fa-user-graduate text-gray-500 mr-1"></i> ${s.profiles?.full_name || s.profiles?.email}</td>
-                    <td class="text-gray-400 max-w-xs truncate">${s.work_text || '—'}</td>
-                    <td>${statusHtml}</td>
-                    <td class="text-center font-bold">${gradeHtml}</td>
-                    <td>${actionHtml}</td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-    window.openGradeModal = (id, studentName, workText) => {
-        document.getElementById('gradingSubmissionId').value = id;
-        document.getElementById('gradeStudentName').innerHTML = `<i class="fas fa-user-graduate text-rose-400 mr-2"></i><strong>${studentName}</strong>`;
-        document.getElementById('gradeWorkText').innerText = workText || 'Текст работы не указан';
-        document.getElementById('gradeModal').classList.remove('hidden');
-    };
-
-    document.getElementById('closeGradeModal').onclick = () => {
-        document.getElementById('gradeModal').classList.add('hidden');
-        document.getElementById('gradeValue').value = '';
-        document.getElementById('debtCheckbox').checked = false;
-        document.getElementById('commentText').value = '';
-    };
-    document.getElementById('saveGradeBtn').onclick = async () => {
-        const submissionId = document.getElementById('gradingSubmissionId').value;
-        const grade = parseInt(document.getElementById('gradeValue').value);
-        const debt = document.getElementById('debtCheckbox').checked;
-        const comment = document.getElementById('commentText').value;
         
-        if (grade && (grade < 2 || grade > 5)) return alert('Оценка должна быть от 2 до 5');
+        document.getElementById('logoutBtn').onclick = async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+        };
         
-        await supabase.from('submissions').update({
-            grade: grade || null,
-            debt: debt,
-            teacher_comment: comment,
-            status: 'graded',
-            graded_at: new Date()
-        }).eq('id', submissionId);
-        
-        alert('✅ Оценка сохранена!');
-        document.getElementById('gradeModal').classList.add('hidden');
-        document.getElementById('gradeValue').value = '';
-        document.getElementById('debtCheckbox').checked = false;
-        document.getElementById('commentText').value = '';
-        await loadSubmissionsTable();
-    };
+        document.getElementById('createAssignment').onclick = async () => {
+            const title = document.getElementById('newTitle').value;
+            if (!title) return alert('Введите название');
+            
+            await supabase.from('assignments').insert({
+                title: title,
+                description: document.getElementById('newDesc').value,
+                due_date: document.getElementById('newDueDate').value,
+                created_by: user.id
+            });
+            
+            alert('Работа создана!');
+            location.reload();
+        };
+    });
 }
+
+// Запускаем проверку сессии
+checkSession();
