@@ -3,258 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduCheck | Премиум система проверки работ</title>
+    <title>EduCheck - Вход</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
-            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            background: radial-gradient(circle at 20% 50%, rgba(30, 30, 40, 1) 0%, rgba(15, 15, 25, 1) 100%);
-            position: relative;
-            overflow-x: hidden;
+            font-family: system-ui, -apple-system, sans-serif;
         }
-        
-        /* Анимированные частицы */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        .particle {
-            position: absolute;
-            background: linear-gradient(135deg, rgba(255, 107, 129, 0.4), rgba(255, 75, 105, 0.2));
-            border-radius: 50%;
-            animation: float 20s infinite ease-in-out;
-            filter: blur(3px);
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
-            25% { transform: translateY(-30px) translateX(20px) rotate(90deg); }
-            50% { transform: translateY(-60px) translateX(-15px) rotate(180deg); }
-            75% { transform: translateY(-30px) translateX(25px) rotate(270deg); }
-        }
-        
-        /* Стекломорфная карточка */
-        .glass-card-premium {
-            background: rgba(25, 25, 35, 0.65);
-            backdrop-filter: blur(20px) saturate(180%);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .glass-card-premium:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.6);
-            border-color: rgba(255, 107, 129, 0.3);
-        }
-        
-        /* Неоморфные поля ввода */
-        .neo-input {
-            background: rgba(20, 20, 28, 0.8);
-            border: none;
-            border-radius: 20px;
-            padding: 14px 20px;
-            color: #fff;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3), inset -2px -2px 5px rgba(255, 255, 255, 0.03), 5px 5px 12px rgba(0, 0, 0, 0.2);
-        }
-        
-        .neo-input:focus {
-            outline: none;
-            box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(255, 107, 129, 0.3);
-            transform: scale(1.02);
-        }
-        
-        .neo-input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
-        
-        /* Градиентная кнопка с эффектом */
-        .btn-gradient-premium {
-            background: linear-gradient(135deg, #ff6b81 0%, #ff4b69 100%);
-            border: none;
-            border-radius: 20px;
-            padding: 14px;
-            font-weight: 700;
-            font-size: 16px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(255, 75, 105, 0.3);
-        }
-        
-        .btn-gradient-premium::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        
-        .btn-gradient-premium:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        .btn-gradient-premium:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 75, 105, 0.5);
-        }
-        
-        /* Анимированные вкладки */
-        .tab-premium {
-            position: relative;
-            padding: 12px 24px;
+        .card {
+            background: white;
             border-radius: 24px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: transparent;
-            color: rgba(255, 255, 255, 0.6);
+            padding: 32px;
+            max-width: 450px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        
-        .tab-premium.active {
-            background: linear-gradient(135deg, rgba(255, 107, 129, 0.2), rgba(255, 75, 105, 0.1));
-            color: #ff6b81;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 10px rgba(0, 0, 0, 0.2);
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s;
         }
-        
-        .tab-premium.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 2px;
-            background: linear-gradient(90deg, #ff6b81, #ff4b69);
-            border-radius: 2px;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
-        
-        @keyframes fadeSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .tab-active {
+            background: #667eea;
+            color: white;
         }
-        
-        .animate-in {
-            animation: fadeSlideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        .tab-inactive {
+            background: #e5e7eb;
+            color: #374151;
         }
-        
-        /* Стили для селекта */
-        .neo-select {
-            background: rgba(20, 20, 28, 0.8);
-            border: none;
-            border-radius: 20px;
-            padding: 14px 20px;
-            color: #fff;
-            cursor: pointer;
-            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3), inset -2px -2px 5px rgba(255, 255, 255, 0.03), 5px 5px 12px rgba(0, 0, 0, 0.2);
+        .input-field {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px 16px;
+            width: 100%;
+            transition: all 0.3s;
         }
-        
-        .neo-select option {
-            background: #1a1a24;
-        }
-        
-        /* Анимированный градиентный текст */
-        .gradient-text {
-            background: linear-gradient(135deg, #ff6b81, #ffb347, #ff6b81);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: shine 3s linear infinite;
-        }
-        
-        @keyframes shine {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
     </style>
 </head>
-<body>
-    <div class="particles" id="particles"></div>
-    
-    <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div class="glass-card-premium p-8 w-full max-w-md animate-in">
-            <div class="text-center mb-8">
-                <div class="text-6xl mb-3 animate-pulse">✨🎓✨</div>
-                <h1 class="text-4xl font-bold gradient-text mb-2">EduCheck</h1>
-                <p class="text-gray-400 text-sm">Премиум система проверки работ</p>
-                <div class="w-20 h-0.5 bg-gradient-to-r from-transparent via-rose-400 to-transparent mx-auto mt-4"></div>
-            </div>
-            
-            <div class="flex gap-2 mb-8 p-1 bg-black/20 rounded-2xl">
-                <button id="loginTab" class="tab-premium active flex-1">Вход</button>
-                <button id="registerTab" class="tab-premium flex-1">Регистрация</button>
-            </div>
-
-            <!-- Форма входа -->
-            <div id="loginForm">
-                <input type="email" id="loginEmail" placeholder="Email" class="neo-input w-full mb-4">
-                <input type="password" id="loginPassword" placeholder="Пароль" class="neo-input w-full mb-6">
-                <button id="doLogin" class="btn-gradient-premium w-full">Войти в систему →</button>
-            </div>
-
-            <!-- Форма регистрации -->
-            <div id="registerForm" class="hidden">
-                <input type="text" id="regName" placeholder="Полное имя" class="neo-input w-full mb-4">
-                <input type="email" id="regEmail" placeholder="Email" class="neo-input w-full mb-4">
-                <input type="password" id="regPassword" placeholder="Пароль" class="neo-input w-full mb-4">
-                <select id="regRole" class="neo-select w-full mb-6">
-                    <option value="student">👨‍🎓 Студент</option>
-                    <option value="teacher">👨‍🏫 Преподаватель</option>
-                </select>
-                <button id="doRegister" class="btn-gradient-premium w-full">Создать аккаунт →</button>
-            </div>
-            <div id="message" class="mt-4 text-center text-sm text-rose-400"></div>
+<body class="flex items-center justify-center p-4">
+    <div class="card">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">📚 EduCheck</h1>
+            <p class="text-gray-500 mt-1">Система проверки работ</p>
         </div>
+
+        <div class="flex gap-2 mb-6">
+            <button id="loginTab" class="tab-active flex-1 py-2 rounded-lg font-semibold transition-all">Вход</button>
+            <button id="registerTab" class="tab-inactive flex-1 py-2 rounded-lg font-semibold transition-all">Регистрация</button>
+        </div>
+
+        <!-- Форма входа -->
+        <div id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Email" class="input-field mb-3">
+            <input type="password" id="loginPassword" placeholder="Пароль" class="input-field mb-4">
+            <button id="doLogin" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">Войти</button>
+        </div>
+
+        <!-- Форма регистрации -->
+        <div id="registerForm" class="hidden">
+            <input type="text" id="regName" placeholder="Полное имя" class="input-field mb-3">
+            <input type="email" id="regEmail" placeholder="Email" class="input-field mb-3">
+            <input type="password" id="regPassword" placeholder="Пароль (мин. 6 символов)" class="input-field mb-3">
+            <select id="regRole" class="input-field mb-4 bg-white">
+                <option value="student">👨‍🎓 Студент</option>
+                <option value="teacher">👨‍🏫 Преподаватель</option>
+            </select>
+            <button id="doRegister" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">Зарегистрироваться</button>
+        </div>
+
+        <div id="message" class="mt-4 text-center text-sm"></div>
     </div>
 
-    <script>
-        // Генерация частиц
-        function createParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                const size = Math.random() * 6 + 2;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.top = `${Math.random() * 100}%`;
-                particle.style.animationDelay = `${Math.random() * 20}s`;
-                particle.style.animationDuration = `${15 + Math.random() * 20}s`;
-                container.appendChild(particle);
-            }
-        }
-        createParticles();
-    </script>
     <script src="app.js"></script>
 </body>
 </html>

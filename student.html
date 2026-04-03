@@ -3,252 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduCheck | Студенческий портал</title>
+    <title>EduCheck - Студент</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
-            min-height: 100vh;
-        }
-        
-        /* Анимированный градиентный хедер */
-        .gradient-header-premium {
-            background: linear-gradient(135deg, rgba(255, 107, 129, 0.15), rgba(255, 75, 105, 0.05));
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
-        
-        /* Стеклянные карточки */
-        .glass-card-dark {
-            background: rgba(25, 25, 40, 0.6);
-            backdrop-filter: blur(16px);
-            border-radius: 28px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .glass-card-dark:hover {
-            transform: translateY(-4px);
-            border-color: rgba(255, 107, 129, 0.3);
-            box-shadow: 0 20px 40px -20px rgba(255, 107, 129, 0.3);
-        }
-        
-        /* Премиум таблица */
-        .premium-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-        
-        .premium-table th {
-            background: rgba(30, 30, 45, 0.8);
-            padding: 18px 20px;
-            font-weight: 600;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: rgba(255, 255, 255, 0.7);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .premium-table td {
-            padding: 16px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.85);
-        }
-        
-        .premium-table tr {
-            transition: all 0.3s ease;
-        }
-        
-        .premium-table tbody tr:hover {
-            background: rgba(255, 107, 129, 0.08);
-            transform: scale(1.01);
-        }
-        
-        /* Бейджи */
-        .badge-premium {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 40px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        
-        .badge-pending {
-            background: rgba(255, 193, 7, 0.15);
-            border: 1px solid rgba(255, 193, 7, 0.3);
-            color: #ffc107;
-        }
-        
-        .badge-graded {
-            background: rgba(76, 175, 80, 0.15);
-            border: 1px solid rgba(76, 175, 80, 0.3);
-            color: #4caf50;
-        }
-        
-        .badge-debt {
-            background: linear-gradient(135deg, rgba(255, 107, 129, 0.2), rgba(255, 75, 105, 0.15));
-            border: 1px solid rgba(255, 107, 129, 0.4);
-            color: #ff6b81;
-        }
-        
-        /* Кнопка с неоморфизмом */
-        .neo-btn {
-            background: linear-gradient(135deg, #ff6b81, #ff4b69);
-            border: none;
-            padding: 10px 24px;
-            border-radius: 40px;
-            color: white;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 75, 105, 0.3);
-        }
-        
-        .neo-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 75, 105, 0.5);
-        }
-        
-        /* Анимированная кнопка выхода */
-        .logout-btn {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 10px 24px;
-            border-radius: 40px;
-            transition: all 0.3s ease;
-        }
-        
-        .logout-btn:hover {
-            background: rgba(255, 75, 105, 0.2);
-            border-color: rgba(255, 107, 129, 0.5);
-            transform: translateX(3px);
-        }
-        
-        /* Модальное окно */
-        .modal-premium {
-            background: rgba(15, 15, 25, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 32px;
-            animation: modalSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        @keyframes modalSlide {
-            from {
-                opacity: 0;
-                transform: scale(0.95) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-        
-        /* Счётчик анимации */
-        .stat-card {
-            background: linear-gradient(135deg, rgba(255, 107, 129, 0.1), rgba(255, 75, 105, 0.05));
-            border-radius: 24px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            background: linear-gradient(135deg, rgba(255, 107, 129, 0.15), rgba(255, 75, 105, 0.1));
-        }
-        
-        /* Скроллбар */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #ff6b81, #ff4b69);
-            border-radius: 10px;
-        }
-        
-        /* Анимация загрузки */
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-        
-        .skeleton {
-            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-            background-size: 1000px 100%;
-            animation: shimmer 2s infinite;
-        }
+        body { background: #f3f4f6; font-family: system-ui, sans-serif; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-graded { background: #d1fae5; color: #10b981; }
+        .btn-submit { background: #667eea; color: white; padding: 6px 16px; border-radius: 8px; transition: all 0.2s; }
+        .btn-submit:hover { background: #5a67d8; transform: scale(1.02); }
     </style>
 </head>
 <body>
-    <div class="gradient-header-premium p-5">
+    <div class="header text-white p-5">
         <div class="container mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold bg-gradient-to-r from-rose-400 to-pink-500 bg-clip-text text-transparent">
-                    <i class="fas fa-graduation-cap mr-2"></i>EduCheck
-                </h1>
-                <p class="text-gray-400 text-sm mt-1">Студенческий портал</p>
-            </div>
-            <button id="logoutBtn" class="logout-btn text-white flex items-center gap-2">
-                <i class="fas fa-sign-out-alt"></i> Выйти
-            </button>
+            <h1 class="text-2xl font-bold">🎓 Личный кабинет студента</h1>
+            <button id="logoutBtn" class="bg-white/20 px-4 py-2 rounded-lg hover:bg-white/30 transition">🚪 Выйти</button>
         </div>
     </div>
 
     <div class="container mx-auto p-6">
-        <!-- Статистика -->
-        <div class="grid md:grid-cols-3 gap-4 mb-8">
-            <div class="stat-card">
-                <i class="fas fa-tasks text-3xl text-rose-400 mb-2"></i>
-                <div class="text-2xl font-bold text-white" id="totalAssignments">0</div>
-                <div class="text-gray-400 text-sm">Всего работ</div>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-check-circle text-3xl text-green-400 mb-2"></i>
-                <div class="text-2xl font-bold text-white" id="completedCount">0</div>
-                <div class="text-gray-400 text-sm">Выполнено</div>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-chart-line text-3xl text-rose-400 mb-2"></i>
-                <div class="text-2xl font-bold text-white" id="avgGrade">0</div>
-                <div class="text-gray-400 text-sm">Средний балл</div>
-            </div>
-        </div>
-        
-        <!-- Активные задания -->
-        <div class="glass-card-dark p-6 mb-8">
-            <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <i class="fas fa-clipboard-list text-rose-400"></i>
-                Текущие практические работы
-                <span class="text-xs bg-rose-500/20 px-2 py-1 rounded-full ml-2" id="pendingCount">0</span>
-            </h2>
+        <!-- Задания -->
+        <div class="card p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">📋 Практические работы</h2>
             <div class="overflow-x-auto">
-                <table class="premium-table">
-                    <thead>
-                        <tr><th>Название</th><th>Описание</th><th>Срок</th><th>Действие</th></tr>
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="p-3 text-left">Название</th>
+                            <th class="p-3 text-left">Описание</th>
+                            <th class="p-3 text-left">Срок</th>
+                            <th class="p-3 text-center">Действие</th>
+                        </tr>
                     </thead>
                     <tbody id="assignmentsTable"></tbody>
                 </table>
@@ -256,15 +45,18 @@
         </div>
 
         <!-- Результаты -->
-        <div class="glass-card-dark p-6">
-            <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <i class="fas fa-chart-simple text-rose-400"></i>
-                Мои результаты
-            </h2>
+        <div class="card p-6">
+            <h2 class="text-xl font-bold mb-4">✅ Мои результаты</h2>
             <div class="overflow-x-auto">
-                <table class="premium-table">
-                    <thead>
-                        <tr><th>Работа</th><th>Текст</th><th>Статус</th><th>Оценка</th><th>Комментарий</th></tr>
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="p-3 text-left">Работа</th>
+                            <th class="p-3 text-left">Текст</th>
+                            <th class="p-3 text-center">Статус</th>
+                            <th class="p-3 text-center">Оценка</th>
+                            <th class="p-3 text-left">Комментарий</th>
+                        </tr>
                     </thead>
                     <tbody id="resultsTable"></tbody>
                 </table>
@@ -272,21 +64,19 @@
         </div>
     </div>
 
-    <!-- Модальное окно -->
-    <div id="submitModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="modal-premium p-8 w-full max-w-lg mx-4">
-            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-                <i class="fas fa-paper-plane text-rose-400"></i>
-                Сдать работу
-            </h3>
-            <input type="text" id="assignmentId" hidden>
-            <textarea id="workText" rows="6" class="w-full bg-black/30 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-rose-400 transition-all" placeholder="Введите текст работы или ссылку..."></textarea>
-            <div class="flex justify-end gap-3 mt-6">
-                <button id="closeModal" class="px-5 py-2 bg-white/10 rounded-xl hover:bg-white/20 transition-all text-white">Отмена</button>
-                <button id="submitWorkBtn" class="neo-btn">Отправить на проверку</button>
+    <!-- Модалка сдачи -->
+    <div id="submitModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold mb-4">📤 Сдать работу</h3>
+            <input type="hidden" id="assignmentId">
+            <textarea id="workText" rows="5" class="w-full border rounded-lg p-3 mb-4" placeholder="Введите текст работы или ссылку..."></textarea>
+            <div class="flex justify-end gap-3">
+                <button id="closeModal" class="px-4 py-2 bg-gray-300 rounded-lg">Отмена</button>
+                <button id="submitWorkBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Отправить</button>
             </div>
         </div>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>
