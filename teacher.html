@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduCheck | Teacher Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a15 0%, #14142b 50%, #1a1a35 100%);
+            min-height: 100vh;
+        }
+        
+        .gradient-header {
+            background: linear-gradient(135deg, rgba(255, 107, 129, 0.12), rgba(255, 75, 105, 0.06));
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .premium-card {
+            background: rgba(20, 20, 35, 0.7);
+            backdrop-filter: blur(16px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s ease;
+        }
+        
+        .premium-card:hover {
+            border-color: rgba(255, 107, 129, 0.3);
+            box-shadow: 0 20px 40px -20px rgba(255, 107, 129, 0.2);
+        }
+        
+        .premium-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .premium-table th {
+            background: rgba(30, 30, 50, 0.8);
+            padding: 16px 18px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .premium-table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .premium-table tbody tr {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .premium-table tbody tr:hover {
+            background: rgba(255, 107, 129, 0.06);
+        }
+        
+        .btn-create {
+            background: linear-gradient(135deg, #ff6b81, #ff4b69);
+            border-radius: 40px;
+            padding: 12px 28px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 75, 105, 0.3);
+        }
+        
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 75, 105, 0.5);
+        }
+        
+        .btn-grade {
+            background: rgba(255, 193, 7, 0.15);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 40px;
+            padding: 8px 20px;
+            color: #ffc107;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-grade:hover {
+            background: rgba(255, 193, 7, 0.25);
+            transform: scale(1.05);
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+        }
+        
+        .status-graded {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4caf50;
+        }
+        
+        .modal-premium {
+            background: rgba(15, 15, 30, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .input-dark {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 12px 18px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .input-dark:focus {
+            outline: none;
+            border-color: #ff6b81;
+            box-shadow: 0 0 0 3px rgba(255, 107, 129, 0.2);
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: #ff6b81;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-header p-5">
+        <div class="container mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-rose-400 to-pink-500 bg-clip-text text-transparent">
+                    <i class="fas fa-chalkboard-user mr-2"></i>EduCheck
+                </h1>
+                <p class="text-gray-400 text-sm mt-1">Преподавательская панель</p>
+            </div>
+            <button id="logoutBtn" class="bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2 rounded-full transition-all text-white flex items-center gap-2">
+                <i class="fas fa-sign-out-alt"></i> Выйти
+            </button>
+        </div>
+    </div>
+
+    <div class="container mx-auto p-6">
+        <!-- Создание работы -->
+        <div class="premium-card p-6 mb-8">
+            <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fas fa-plus-circle text-rose-400"></i>
+                Создать новую работу
+            </h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <input type="text" id="newTitle" placeholder="Название работы" class="input-dark">
+                <input type="date" id="newDueDate" class="input-dark">
+                <textarea id="newDesc" rows="3" placeholder="Описание задания..." class="md:col-span-2 input-dark"></textarea>
+                <button id="createAssignment" class="btn-create text-white w-full md:w-auto">
+                    <i class="fas fa-magic mr-2"></i>Создать работу
+                </button>
+            </div>
+        </div>
+
+        <!-- Таблица работ -->
+        <div class="premium-card p-6">
+            <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fas fa-inbox text-rose-400"></i>
+                Работы на проверку
+                <span class="text-xs bg-rose-500/20 px-2 py-1 rounded-full ml-2" id="pendingSubmissionsCount">0</span>
+            </h2>
+            <div class="overflow-x-auto scrollbar-custom">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-book mr-1"></i> Работа</th>
+                            <th><i class="fas fa-user mr-1"></i> Студент</th>
+                            <th><i class="fas fa-file-alt mr-1"></i> Текст</th>
+                            <th><i class="fas fa-chart-simple mr-1"></i> Статус</th>
+                            <th><i class="fas fa-star mr-1"></i> Оценка</th>
+                            <th><i class="fas fa-cog mr-1"></i> Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissionsTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка оценки -->
+    <div id="gradeModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="modal-premium p-8 w-full max-w-lg mx-4">
+            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fas fa-pen-fancy text-rose-400"></i>
+                Оценить работу
+            </h3>
+            <p id="gradeStudentName" class="text-gray-300 mb-3 flex items-center gap-2">
+                <i class="fas fa-user-graduate"></i> <span></span>
+            </p>
+            <div class="bg-black/30 p-4 rounded-2xl mb-4 max-h-32 overflow-y-auto scrollbar-custom">
+                <p id="gradeWorkText" class="text-gray-400 text-sm"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <input type="number" id="gradeValue" placeholder="Оценка (2-5)" min="2" max="5" class="input-dark">
+                <label class="flex items-center gap-2 bg-black/30 rounded-2xl p-3 cursor-pointer border border-white/10">
+                    <input type="checkbox" id="debtCheckbox" class="w-5 h-5 accent-rose-500"> 
+                    <span class="text-rose-400 font-semibold"><i class="fas fa-exclamation-triangle mr-1"></i>Долг</span>
+                </label>
+            </div>
+            <textarea id="commentText" rows="3" placeholder="Комментарий преподавателя..." class="input-dark w-full mb-4"></textarea>
+            <input type="hidden" id="gradingSubmissionId">
+            <div class="flex justify-end gap-3">
+                <button id="closeGradeModal" class="px-5 py-2 bg-white/10 rounded-xl hover:bg-white/20 transition-all text-white">Отмена</button>
+                <button id="saveGradeBtn" class="bg-gradient-to-r from-rose-500 to-pink-500 px-5 py-2 rounded-xl text-white font-semibold hover:shadow-lg transition-all">
+                    <i class="fas fa-save mr-1"></i> Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
